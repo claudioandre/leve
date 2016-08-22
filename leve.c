@@ -34,6 +34,7 @@ static char *get_uri(char *orig);
 static char *str_append_fast(char *dest, char *string);
 static int copy_file(const char *orig, const char *dest);
 static int file_exists(const char *filename);
+static char *find_icon(char *arg_v);
 
 GtkWidget *window;
 char *cur_filename = "";
@@ -42,16 +43,13 @@ char *cur_filename = "";
 int main(int argc, char *argv[])
 {
 	// The web page to be loaded into the browser
-	char *uri, *name, *p;
+	char *uri, *name;
 	GtkWidget *main_window;
 	GtkWidget *scroll_window;
 	WebKitWebView *webView;
 	GdkPixbuf *icon;
 
-	name = malloc(strlen(argv[0]) + 5);
-	p = str_append_fast(name, argv[0]);
-	p = str_append_fast(p, ".png");
-	*p = 0;
+	name = find_icon(argv[0]);
 
 	// Initialize GTK+
 	gtk_init(&argc, &argv);
@@ -225,6 +223,7 @@ static char *str_append_fast(char *dest, char *string)
 
 	while (*s)
 		*d++ = *s++;
+	*d = 0;
 
 	return d;
 }
@@ -263,3 +262,41 @@ static int file_exists(const char *filename)
 	}
 	return 0;
 }
+
+
+/*
+ * Try to find the application icon $PATH:
+ * - return the icon location.
+ */
+static char *find_icon(char *arg_v)
+{
+	char *name, *p, *s, *tmp;
+	char *tmp_value;
+
+	name = malloc(strlen(arg_v) + 5);
+	tmp = str_append_fast(name, arg_v);
+	tmp = str_append_fast(tmp, ".png");
+
+	if (!file_exists(name) && (tmp_value = getenv("PATH"))) {
+		s = tmp_value;
+
+		do {
+			p = strchr(s, ':');
+
+			if (p)
+				*p = 0;
+
+			// Set a file name
+			free(name);
+			name = malloc(strlen(s) + 10);
+			tmp = str_append_fast(name, s);
+			tmp = str_append_fast(tmp, "/leve.png");
+
+			if (file_exists(name))
+				break;
+			s = p + 1;
+		} while (p);
+	}
+	return name;
+}
+
