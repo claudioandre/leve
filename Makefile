@@ -25,6 +25,7 @@ EXTRA = leve.png
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+	rm -f links
 	$(LN) $(EXECUTABLE) links
 
 clean:

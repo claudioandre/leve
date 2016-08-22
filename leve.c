@@ -42,20 +42,26 @@ char *cur_filename = "";
 int main(int argc, char *argv[])
 {
 	// The web page to be loaded into the browser
-	char *uri;
+	char *uri, *name, *p;
 	GtkWidget *main_window;
 	GtkWidget *scroll_window;
 	WebKitWebView *webView;
 	GdkPixbuf *icon;
+
+	name = malloc(strlen(argv[0]) + 5);
+	p = str_append_fast(name, argv[0]);
+	p = str_append_fast(p, ".png");
+	*p = 0;
 
 	// Initialize GTK+
 	gtk_init(&argc, &argv);
 
 	// Create the main window
 	main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	icon = create_pixbuf(name);
 
-	icon = create_pixbuf("leve.png");
-	gtk_window_set_icon(GTK_WINDOW(main_window), icon);
+	if (icon)
+		gtk_window_set_icon(GTK_WINDOW(main_window), icon);
 	gtk_window_set_title(GTK_WINDOW(main_window),
 	                     "Recommended Configurations");
 	gtk_window_set_default_size(GTK_WINDOW(main_window), 1050, 600);
@@ -92,13 +98,16 @@ int main(int argc, char *argv[])
 	webkit_web_view_load_uri(webView, uri);
 	gtk_widget_grab_focus(GTK_WIDGET(webView));
 	gtk_widget_show_all(main_window);
-	g_object_unref(icon);
+
+	if (icon)
+		g_object_unref(icon);
 
 	// Run the main GTK+ event loop
 	gtk_main();
 
 	// Release resources
 	free(uri);
+	free(name);
 
 	return 0;
 }
