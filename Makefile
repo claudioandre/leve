@@ -2,6 +2,10 @@
 # There's ABSOLUTELY NO WARRANTY, express or implied.
 #
 CC = gcc
+LN = ln -s
+CP = cp
+MKDIR = /bin/mkdir -p
+
 CFLAGS = -c -g -O2 -Wall 
 LDFLAGS = -L /usr/lib
 
@@ -14,13 +18,21 @@ LDFLAGS += `pkg-config --libs gtk+-2.0 webkit-1.0`
 SOURCES = leve.c
 OBJECTS = leve.o
 EXECUTABLE = leve
+EXTRA = leve.png
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(LN) $(EXECUTABLE) links
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) *~
+	rm -f $(OBJECTS) $(EXECUTABLE) *~ links
+
+install:
+	$(MKDIR) $(DESTDIR)/bin
+	$(CP) $(EXECUTABLE) $(DESTDIR)/bin
+	$(CP) $(EXTRA) $(DESTDIR)/bin
+	$(CP) links $(DESTDIR)/bin
 
